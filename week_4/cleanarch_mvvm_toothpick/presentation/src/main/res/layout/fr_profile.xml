@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data class="ProfileBinding">
+
+        <import type="android.view.View" />
+
+        <variable
+            name="profile"
+            type="com.elegion.test.behancer.ui.profile.ProfileViewModel" />
+
+    </data>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refresher"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        bind:onRefresh="@{profile.onRefreshListener}"
+        bind:refreshState="@{profile.isLoading}">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/view_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:visibility="@{profile.isErrorVisible ? View.GONE : View.VISIBLE}">
+
+                <ImageView
+                    android:id="@+id/iv_profile"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
+                    android:contentDescription="@string/content_description_details"
+                    bind:imageUrl="@{profile.photoUrl}" />
+
+                <TextView
+                    android:id="@+id/tv_display_name_details"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/iv_profile"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toEndOf="@id/iv_profile"
+                    android:layout_toRightOf="@id/iv_profile"
+                    android:text="@{profile.profileName}"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_username_details"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_display_name_details"
+                    android:layout_alignStart="@id/tv_display_name_details"
+                    android:layout_alignLeft="@id/tv_display_name_details" />
+
+                <TextView
+                    android:id="@+id/tv_created_on_details"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_username_details"
+                    android:layout_alignStart="@id/tv_username_details"
+                    android:layout_alignLeft="@id/tv_username_details"
+                    android:text="@{profile.profileCreatedOn}" />
+
+                <TextView
+                    android:id="@+id/tv_location_details"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_created_on_details"
+                    android:layout_alignStart="@id/tv_created_on_details"
+                    android:layout_alignLeft="@id/tv_created_on_details"
+                    android:text="@{profile.profileLocation}" />
+
+            </RelativeLayout>
+
+            <include
+                layout="@layout/v_error"
+                bind:isVisible="@{profile.isErrorVisible}" />
+
+        </LinearLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</layout>

@@ -1,0 +1,113 @@
+Index: app/src/main/java/com/elegion/test/behancer/ui/projects/ProjectsViewModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.elegion.test.behancer.ui.projects;\r\n\r\nimport android.arch.lifecycle.LiveData;\r\nimport android.arch.lifecycle.MutableLiveData;\r\nimport android.arch.lifecycle.ViewModel;\r\nimport android.arch.paging.PagedList;\r\nimport android.support.v4.widget.SwipeRefreshLayout;\r\n\r\nimport com.elegion.test.behancer.BuildConfig;\r\nimport com.elegion.test.behancer.data.Storage;\r\nimport com.elegion.test.behancer.data.model.project.ProjectResponse;\r\nimport com.elegion.test.behancer.data.model.project.RichProject;\r\nimport com.elegion.test.behancer.utils.ApiUtils;\r\n\r\nimport io.reactivex.disposables.Disposable;\r\nimport io.reactivex.schedulers.Schedulers;\r\n\r\n/**\r\n * @author Azret Magometov\r\n */\r\npublic class ProjectsViewModel extends ViewModel {\r\n\r\n    private Disposable mDisposable;\r\n    private Storage mStorage;\r\n\r\n    private ProjectsAdapter.OnItemClickListener mOnItemClickListener;\r\n    private MutableLiveData<Boolean> mIsLoading = new MutableLiveData<>();\r\n    private MutableLiveData<Boolean> mIsErrorVisible = new MutableLiveData<>();\r\n    private LiveData<PagedList<RichProject>> mProjects;\r\n    private SwipeRefreshLayout.OnRefreshListener mOnRefreshListener = this::updateProjects;\r\n\r\n    public ProjectsViewModel(Storage storage, ProjectsAdapter.OnItemClickListener onItemClickListener) {\r\n        mStorage = storage;\r\n        mOnItemClickListener = onItemClickListener;\r\n        mProjects = mStorage.getProjectsPaged();\r\n        updateProjects();\r\n    }\r\n\r\n    private void updateProjects() {\r\n        mDisposable = ApiUtils.getApiService().getProjects(BuildConfig.API_QUERY)\r\n                .map(ProjectResponse::getProjects)\r\n                .doOnSubscribe(disposable -> mIsLoading.postValue(true))\r\n                .doFinally(() -> mIsLoading.postValue(false))\r\n                .doOnSuccess(response -> mIsErrorVisible.postValue(false))\r\n                .subscribeOn(Schedulers.io())\r\n                .subscribe(\r\n                        response -> mStorage.insertProjects(response),\r\n                        throwable -> {\r\n                            boolean value = mProjects.getValue() == null || mProjects.getValue().size() == 0;\r\n                            mIsErrorVisible.postValue(value);\r\n                        });\r\n\r\n    }\r\n\r\n    @Override\r\n    public void onCleared() {\r\n        mStorage = null;\r\n        if (mDisposable != null) {\r\n            mDisposable.dispose();\r\n        }\r\n    }\r\n\r\n    public ProjectsAdapter.OnItemClickListener getOnItemClickListener() {\r\n        return mOnItemClickListener;\r\n    }\r\n\r\n    public MutableLiveData<Boolean> getIsLoading() {\r\n        return mIsLoading;\r\n    }\r\n\r\n    public MutableLiveData<Boolean> getIsErrorVisible() {\r\n        return mIsErrorVisible;\r\n    }\r\n\r\n    public LiveData<PagedList<RichProject>> getProjects() {\r\n        return mProjects;\r\n    }\r\n\r\n    public SwipeRefreshLayout.OnRefreshListener getOnRefreshListener() {\r\n        return mOnRefreshListener;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/elegion/test/behancer/ui/projects/ProjectsViewModel.java	(revision 2d329e017ad383a90561d25269896bafa50c472b)
++++ app/src/main/java/com/elegion/test/behancer/ui/projects/ProjectsViewModel.java	(date 1614868028694)
+@@ -41,7 +41,8 @@
+                 .map(ProjectResponse::getProjects)
+                 .doOnSubscribe(disposable -> mIsLoading.postValue(true))
+                 .doFinally(() -> mIsLoading.postValue(false))
+-                .doOnSuccess(response -> mIsErrorVisible.postValue(false))
++                .doOnSuccess(response -> {
++                    mIsErrorVisible.postValue(false);})
+                 .subscribeOn(Schedulers.io())
+                 .subscribe(
+                         response -> mStorage.insertProjects(response),
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>apply plugin: 'com.android.application'\r\n\r\nandroid {\r\n    compileSdkVersion 27\r\n    defaultConfig {\r\n        applicationId \"com.elegion.test.behancer\"\r\n        minSdkVersion 15\r\n        targetSdkVersion 27\r\n        versionCode 1\r\n        versionName \"1.0\"\r\n        testInstrumentationRunner \"android.support.test.runner.AndroidJUnitRunner\"\r\n\r\n        buildConfigField \"String\", \"API_URL\", '\"https://www.behance.net/\"'\r\n        buildConfigField \"String\", \"API_KEY\", '\"PK2ePWvvXiBXzzHWDHPCsjEvJdZzhIQm\"'\r\n        buildConfigField \"String\", \"API_QUERY\", '\"motorcycle\"'\r\n    }\r\n    buildTypes {\r\n        release {\r\n            minifyEnabled false\r\n            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'\r\n        }\r\n    }\r\n\r\n    dataBinding{\r\n        enabled = true\r\n    }\r\n\r\n    compileOptions {\r\n        sourceCompatibility JavaVersion.VERSION_1_8\r\n        targetCompatibility JavaVersion.VERSION_1_8\r\n    }\r\n}\r\n\r\ndependencies {\r\n    implementation fileTree(dir: 'libs', include: ['*.jar'])\r\n    implementation 'com.android.support:appcompat-v7:27.1.0'\r\n    implementation 'com.android.support.constraint:constraint-layout:1.0.2'\r\n    implementation 'com.android.support:recyclerview-v7:27.1.0'\r\n    implementation 'com.google.code.gson:gson:2.8.2'\r\n    testImplementation 'junit:junit:4.12'\r\n    androidTestImplementation 'com.android.support.test:runner:1.0.1'\r\n    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'\r\n\r\n    implementation 'com.squareup.okhttp3:okhttp:3.9.1'\r\n    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'\r\n    implementation 'com.squareup.retrofit2:retrofit:2.3.0'\r\n    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'\r\n    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'\r\n\r\n    implementation 'io.reactivex.rxjava2:rxjava:2.1.6'\r\n    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'\r\n\r\n    implementation \"android.arch.persistence.room:runtime:1.0.0\"\r\n    annotationProcessor \"android.arch.persistence.room:compiler:1.0.0\"\r\n    implementation \"android.arch.lifecycle:extensions:1.1.1\"\r\n\r\n    implementation \"android.arch.lifecycle:extensions:1.1.1\"\r\n    implementation \"android.arch.paging:runtime:1.0.0-beta1\"\r\n    \r\n    implementation 'com.squareup.picasso:picasso:2.5.2'\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/build.gradle	(revision 2d329e017ad383a90561d25269896bafa50c472b)
++++ app/build.gradle	(date 1614961152437)
+@@ -11,7 +11,7 @@
+         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+ 
+         buildConfigField "String", "API_URL", '"https://www.behance.net/"'
+-        buildConfigField "String", "API_KEY", '"PK2ePWvvXiBXzzHWDHPCsjEvJdZzhIQm"'
++        buildConfigField "String", "API_KEY", '"fFIyGy3d74v0f5qpJecgRPGUEOSNsahl"'
+         buildConfigField "String", "API_QUERY", '"motorcycle"'
+     }
+     buildTypes {
+@@ -21,8 +21,8 @@
+         }
+     }
+ 
+-    dataBinding{
+-        enabled = true
++    buildFeatures {
++        dataBinding true
+     }
+ 
+     compileOptions {
+@@ -41,21 +41,21 @@
+     androidTestImplementation 'com.android.support.test:runner:1.0.1'
+     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+ 
+-    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
++    implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
+-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
++    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
++    implementation 'com.squareup.retrofit2:converter-gson:2.8.0'
+     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+ 
+-    implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
++    implementation 'io.reactivex.rxjava2:rxjava:2.1.8'
+     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+ 
+-    implementation "android.arch.persistence.room:runtime:1.0.0"
+-    annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
++    implementation "android.arch.persistence.room:runtime:1.1.1"
++    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
+     implementation "android.arch.lifecycle:extensions:1.1.1"
+ 
+     implementation "android.arch.lifecycle:extensions:1.1.1"
+-    implementation "android.arch.paging:runtime:1.0.0-beta1"
++    implementation "android.arch.paging:runtime:1.0.1"
+     
+     implementation 'com.squareup.picasso:picasso:2.5.2'
+ }
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#Tue Apr 03 13:19:08 MSK 2018\r\ndistributionBase=GRADLE_USER_HOME\r\ndistributionPath=wrapper/dists\r\nzipStoreBase=GRADLE_USER_HOME\r\nzipStorePath=wrapper/dists\r\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-4.4-all.zip\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1251
+===================================================================
+--- gradle/wrapper/gradle-wrapper.properties	(revision 2d329e017ad383a90561d25269896bafa50c472b)
++++ gradle/wrapper/gradle-wrapper.properties	(date 1614866880730)
+@@ -1,6 +1,6 @@
+-#Tue Apr 03 13:19:08 MSK 2018
++#Thu Mar 04 17:08:00 MSK 2021
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-4.4-all.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-6.5-bin.zip
+Index: build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\n\r\nbuildscript {\r\n    \r\n    repositories {\r\n        google()\r\n        jcenter()\r\n    }\r\n    dependencies {\r\n        classpath 'com.android.tools.build:gradle:3.1.2'\r\n        \r\n\r\n        // NOTE: Do not place your application dependencies here; they belong\r\n        // in the individual module build.gradle files\r\n    }\r\n}\r\n\r\nallprojects {\r\n    repositories {\r\n        google()\r\n        jcenter()\r\n    }\r\n}\r\n\r\ntask clean(type: Delete) {\r\n    delete rootProject.buildDir\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- build.gradle	(revision 2d329e017ad383a90561d25269896bafa50c472b)
++++ build.gradle	(date 1614866880727)
+@@ -7,7 +7,7 @@
+         jcenter()
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:3.1.2'
++        classpath 'com.android.tools.build:gradle:4.1.2'
+         
+ 
+         // NOTE: Do not place your application dependencies here; they belong

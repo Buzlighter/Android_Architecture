@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data class="ProfileBinding">
+
+        <import
+            alias="V"
+            type="android.view.View" />
+
+        <variable
+            name="pvm"
+            type="com.elegion.test.behancer.ui.profile.ProfileViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    <include
+        layout="@layout/v_profile"
+        android:visibility="@{pvm.isProfileVisible ? V.VISIBLE : V.GONE}"/>
+
+    <include
+        layout="@layout/v_error"
+        android:visibility="@{pvm.isErrorVisible ? V.VISIBLE : V.GONE}" />
+
+    </LinearLayout>
+
+</layout>

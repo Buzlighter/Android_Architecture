@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/coursera-3.5-clean_architecture_repositories_livecode.iml" filepath="$PROJECT_DIR$/.idea/modules/coursera-3.5-clean_architecture_repositories_livecode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/data/coursera-3.5-clean_architecture_repositories_livecode.data.iml" filepath="$PROJECT_DIR$/.idea/modules/data/coursera-3.5-clean_architecture_repositories_livecode.data.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/domain/coursera-3.5-clean_architecture_repositories_livecode.domain.iml" filepath="$PROJECT_DIR$/.idea/modules/domain/coursera-3.5-clean_architecture_repositories_livecode.domain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/presentation/coursera-3.5-clean_architecture_repositories_livecode.presentation.iml" filepath="$PROJECT_DIR$/.idea/modules/presentation/coursera-3.5-clean_architecture_repositories_livecode.presentation.iml" />
+    </modules>
+  </component>
+</project>
